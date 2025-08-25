@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Koine Greek Declension Trainer</title>
+  <style>
+    body { font-family: Georgia, serif; padding: 40px; background: #f0fdf4; color: #1b4332; line-height: 1.6; }
+    h1 { font-weight: bold; text-align: center; margin-bottom: 20px; color: #081c15; font-size: 2em; }
+
+    #gender-select, #mode-select {
+      text-align: center;
+      margin-bottom: 25px;
+      max-height: 500px;
+      opacity: 1;
+      transition: opacity 0.15s ease, margin 0.5s ease;
+      overflow: hidden;
+    }
+
+    #gender-select.hidden, #mode-select.hidden {
+      opacity: 0;
+      max-height: 0;
+      margin: 0;
+      pointer-events: none;
+    }
+
+    #gender-select h2, #mode-select h2 { font-size: 1em; margin-bottom: 8px; font-style: italic; color: #1b4332; }
+    .gender-button, .mode-button { cursor: pointer; transition: all 0.3s ease; }
+
+    .gender-button {
+      display: inline-block; padding: 8px 20px; margin: 0 6px; border-radius: 20px; border: none;
+      background: linear-gradient(135deg, #74c69d, #95d5b2); color: #fff; font-size: 0.9em; font-weight: bold;
+    }
+    .gender-button.active { background: linear-gradient(135deg, #1b4332, #2d6a4f); }
+
+    .mode-button {
+      display: inline-block; padding: 14px 32px; margin: 0 10px; border-radius: 30px; border: none;
+      background: linear-gradient(135deg, #2d6a4f, #1b4332); color: #fff; font-size: 1.05em; font-weight: bold;
+    }
+    .mode-button.active { background: linear-gradient(135deg, #081c15, #1b4332); }
+
+    #settings-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #40916c, #1b4332);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 1.2em;
+      color: #fff;
+      cursor: pointer;
+      display: block;
+      z-index: 200;
+    }
+
+    #word-select { text-align: center; margin-bottom: 30px; display: none; position: relative; }
+    #word-select h2 { font-size: 1.2em; color: #1b4332; margin-bottom: 10px; }
+
+    .custom-dropdown { display: inline-block; position: relative; }
+    .custom-dropdown-toggle {
+      padding: 12px 28px;
+      border-radius: 30px;
+      border: 2px solid #2d6a4f;
+      background: #fff;
+      color: #1b4332;
+      font-size: 1.2em;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .custom-dropdown-menu { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 2px solid #2d6a4f; border-radius: 12px; margin-top: 8px; display: none; z-index: 100; }
+    .custom-dropdown-menu div { padding: 12px; font-weight: bold; font-size: 1.2em; color: #1b4332; cursor: pointer; }
+    .custom-dropdown-menu div:hover { background: #95d5b2; color: #000; }
+    .custom-dropdown.open .custom-dropdown-menu { display: block; }
+
+    table {
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 0 auto 20px auto;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    th { background: #1b4332; color: #fff; padding: 18px; font-size: 1.2em; }
+    td { padding: 20px; text-align: center; min-width: 140px; background: #fff; font-size: 1.1em; transition: opacity 0.5s ease, transform 0.5s ease; }
+    td[data-answer] { font-size: 1.2em; background: #f9f9f9; border-radius: 10px; }
+    td.highlight { background: #2d6a4f; color: #fff; font-weight: bold; }
+    td.correct { background: #40916c; color: #fff; font-weight: bold; }
+    td.incorrect { background: #d00000; color: #fff; font-weight: bold; }
+
+    .pool { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; }
+    .pool-item { padding: 14px 20px; border-radius: 25px; cursor: pointer; background: #d8f3dc; color: #1b4332; font-size: 1.2em; }
+    .pool-item:hover { background: #95d5b2; transform: scale(1.05); }
+    .pool-item.used { background: #74c69d; color: #fff; opacity: 0.7; pointer-events: none; }
+
+    #restart-controls { text-align: center; margin-top: 15px; display: none; }
+    .restart-button {
+      padding: 10px 20px; margin: 0 6px; border-radius: 20px; border: none;
+      background: linear-gradient(135deg, #2d6a4f, #1b4332); color: #fff; font-family: Georgia, serif; font-size: 1.1em; font-weight: bold; cursor: pointer;
+    }
+    .restart-button:hover { background: linear-gradient(135deg, #081c15, #1b4332); }
+
+    #hamburger-button { display: none; }
+
+    /* --- Responsive tweaks --- */
+    @media (max-width: 600px) {
+      body { padding: 15px; font-size: 0.9em; }
+      h1 { font-size: 1.5em; }
+
+      table { width: 100%; table-layout: fixed; }
+      th, td { padding: 16px; font-size: 1.1em; text-align: center; word-wrap: break-word; }
+
+      .gender-button, .mode-button, .restart-button {
+        display: block; width: 100%; margin: 6px 0;
+      }
+
+      .custom-dropdown-toggle { width: 100%; text-align: center; }
+
+      .pool { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      .pool-item {
+        width: 100%; padding: 24px; font-size: 1.3em; border-radius: 40px;
+        box-sizing: border-box; text-align: center; display: flex; justify-content: center; align-items: center;
+      }
+
+      #settings-button { display: none; }
+      #hamburger-button {
+        position: fixed; top: 10px; right: 10px;
+        background: linear-gradient(135deg, #40916c, #1b4332);
+        border: none; border-radius: 8px;
+        width: 44px; height: 44px;
+        font-size: 1.4em; color: #fff;
+        cursor: pointer; display: block; z-index: 200;
+      }
+    }
+
+    /* --- Dark mode --- */
+    @media (prefers-color-scheme: dark) {
+      body { background: #121212; color: #e6e6e6; }
+      h1 { color: #d8f3dc; }
+
+      .gender-button { background: linear-gradient(135deg, #40916c, #2d6a4f); }
+      .gender-button.active { background: linear-gradient(135deg, #74c69d, #40916c); }
+
+      .mode-button { background: linear-gradient(135deg, #2d6a4f, #081c15); }
+      .mode-button.active { background: linear-gradient(135deg, #95d5b2, #2d6a4f); }
+
+      #settings-button, #hamburger-button {
+        background: linear-gradient(135deg, #2d6a4f, #081c15);
+      }
+
+      .custom-dropdown-toggle {
+        background: #1b4332; color: #e6e6e6; border: 2px solid #74c69d;
+      }
+      .custom-dropdown-menu { background: #1b4332; border: 2px solid #74c69d; }
+      .custom-dropdown-menu div { color: #e6e6e6; }
+      .custom-dropdown-menu div:hover { background: #40916c; color: #fff; }
+
+      table { box-shadow: 0 4px 15px rgba(255,255,255,0.1); }
+      th { background: #2d6a4f; }
+      td { background: #1e1e1e; color: #e6e6e6; }
+      td[data-answer] { background: #2c2c2c; }
+
+      .pool-item { background: #2d6a4f; color: #fff; }
+      .pool-item:hover { background: #40916c; }
+      .pool-item.used { background: #555; }
+
+      .restart-button { background: linear-gradient(135deg, #2d6a4f, #081c15); }
+      .restart-button:hover { background: linear-gradient(135deg, #74c69d, #2d6a4f); }
+    }
+  </style>
+
+
+</head>
+<body>
+  <h1>Koine Greek Declension Trainer</h1>
+
+  <div id="gender-select">
+    <h2>Select Gender</h2>
+    <button class="gender-button active" data-gender="masc">Masculine</button>
+    <button class="gender-button" data-gender="fem">Feminine</button>
+    <button class="gender-button" data-gender="neut">Neuter</button>
+    <button class="gender-button" data-gender="all">All</button>
+  </div>
+
+  <div id="mode-select">
+    <h2>Select Mode</h2>
+    <button class="mode-button active" data-mode="stem">Stem</button>
+    <button class="mode-button" data-mode="single">One Word</button>
+    <button class="mode-button" data-mode="mixed">Mixed</button>
+  </div>
+
+  <button id="settings-button">⚙</button>
+  <button id="hamburger-button">☰</button>
+
+
+  <div id="word-select">
+    <h2>Select a Vocabulary Word</h2>
+    <div class="custom-dropdown" id="customDropdown">
+      <div class="custom-dropdown-toggle" id="dropdownToggle">λόγος</div>
+      <div class="custom-dropdown-menu" id="dropdownMenu"></div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Case</th>
+        <th>Singular</th>
+        <th>Plural</th>
+      </tr>
+    </thead>
+    <tbody id="declension-grid"></tbody>
+  </table>
+
+  <div class="pool" id="answer-pool"></div>
+  <div id="restart-controls"></div>
+
+  <script>
+    const endings = {
+      "2nd_masc": [["ος","οι"],["ου","ων"],["ῳ","οις"],["ον","ους"],["ε","οι"]],
+      "2nd_neut": [["ον","α"],["ου","ων"],["ῳ","οις"],["ον","α"],["ον","α"]],
+      "1st_fem": [["η","αι"],["ης","ῶν"],["ῃ","αις"],["ην","ας"],["η","αι"]]
+    };
+
+    const vocab = [
+      { word:"λόγος", stem:"λογ", decl:"2nd_masc", gender:"masc" },
+      { word:"θεός", stem:"θε", decl:"2nd_masc", gender:"masc" },
+      { word:"δοῦλος", stem:"δουλ", decl:"2nd_masc", gender:"masc" },
+      { word:"ἄνθρωπος", stem:"ἀνθρωπ", decl:"2nd_masc", gender:"masc" },
+      { word:"κύριος", stem:"κυρι", decl:"2nd_masc", gender:"masc" },
+      { word:"ἔργον", stem:"ἐργ", decl:"2nd_neut", gender:"neut" },
+      { word:"δῶρον", stem:"δωρ", decl:"2nd_neut", gender:"neut" },
+      { word:"ἀρχή", stem:"ἀρχ", decl:"1st_fem", gender:"fem" },
+      { word:"φωνή", stem:"φων", decl:"1st_fem", gender:"fem" },
+      { word:"ἡμέρα", stem:"ἡμερ", decl:"1st_fem", gender:"fem" }
+    ];
+
+    const cases = ["Nominative","Genitive","Dative","Accusative","Vocative"];
+
+    const pool=document.getElementById('answer-pool');
+    const grid=document.getElementById('declension-grid');
+    const restartControls=document.getElementById('restart-controls');
+    const dropdownToggle=document.getElementById('dropdownToggle');
+    const dropdownMenu=document.getElementById('dropdownMenu');
+
+    let currentCell=null;
+    let selectedWord=null;
+    let selectedGender=document.querySelector('.gender-button.active').dataset.gender;
+    let trainingStarted=false;
+    let lastMixedSet=null; // store the last set of mixed forms
+
+    const genderDeclMap={ masc:"2nd_masc", fem:"1st_fem", neut:"2nd_neut" };
+
+    function getDeclKey(){
+      if(selectedGender==="all"){
+        const keys=Object.values(genderDeclMap);
+        return keys[Math.floor(Math.random()*keys.length)];
+      }
+      return genderDeclMap[selectedGender];
+    }
+
+    function shuffle(array){return array.sort(()=>Math.random()-0.5);}
+
+    function buildTable(forms){
+      grid.innerHTML='';
+      cases.forEach((c,i)=>{
+        const row=document.createElement('tr');
+        row.innerHTML=`
+          <td>${c}</td>
+          <td data-answer="${forms[i][0]}"></td>
+          <td data-answer="${forms[i][1]}"></td>
+        `;
+        grid.appendChild(row);
+      });
+    }
+
+    function loadPool(forms){
+      pool.innerHTML='';
+      shuffle(forms.flat()).forEach(form=>{
+        const item=document.createElement('div');
+        item.className='pool-item';
+        item.textContent=form;
+        item.dataset.value=form;
+        pool.appendChild(item);
+      });
+    }
+
+    function highlightNextCell(){
+      const gridCells=document.querySelectorAll('#declension-grid td[data-answer]');
+      const emptyCells=Array.from(gridCells).filter(c=>!c.textContent);
+      if(emptyCells.length===0){
+        if(currentCell)currentCell.classList.remove('highlight');
+        showRestartButtons();
+        return;
+      }
+      if(currentCell)currentCell.classList.remove('highlight');
+      currentCell=emptyCells[Math.floor(Math.random()*emptyCells.length)];
+      currentCell.classList.add('highlight');
+    }
+
+    function generateForms(wordEntry,mode){
+      const baseEndings=endings[wordEntry.decl];
+      return mode==='stem'
+        ? baseEndings.map(pair=>["-"+pair[0],"-"+pair[1]])
+        : baseEndings.map(pair=>[wordEntry.stem+pair[0],wordEntry.stem+pair[1]]);
+    }
+
+    function pickRandomWord(){
+      const genderPool=selectedGender==='all'?vocab:vocab.filter(v=>v.gender===selectedGender);
+      if(genderPool.length===0) return null;
+      let newWord;
+      do{ newWord=genderPool[Math.floor(Math.random()*genderPool.length)].word; }
+      while(newWord===selectedWord&&genderPool.length>1);
+      return newWord;
+    }
+
+    function showRestartButtons(){
+      restartControls.innerHTML='';
+      const mode=document.querySelector('.mode-button.active').dataset.mode;
+      if(mode==='stem'){
+        restartControls.innerHTML='<button class="restart-button" onclick="startGame(\'stem\')">Restart</button>';
+      } 
+      else if(mode==='single'){
+        restartControls.innerHTML='<button class="restart-button" onclick="startGame(\'single\')">Restart</button>'+
+          '<button class="restart-button" onclick="newSingleWord()">New Word</button>';
+      } 
+      else if(mode==='mixed'){
+        restartControls.innerHTML='<button class="restart-button" onclick="restartMixed()">Restart</button>'+
+          '<button class="restart-button" onclick="newMixed()">New Words</button>';
+      }
+      restartControls.style.display='block';
+    }
+
+    function newSingleWord(){
+      const newWord=pickRandomWord();
+      if(newWord){
+        selectedWord=newWord;
+        dropdownToggle.textContent=newWord;
+        startGame('single');
+      }
+    }
+
+    function populateDropdown(genderPool){
+      dropdownMenu.innerHTML='';
+      genderPool.forEach(v=>{
+        const item=document.createElement('div');
+        item.textContent=v.word;
+        item.addEventListener('click',()=>{
+          selectedWord=v.word;
+          dropdownToggle.textContent=v.word;
+          document.getElementById('customDropdown').classList.remove('open');
+          startGame('single');
+        });
+        dropdownMenu.appendChild(item);
+      });
+    }
+
+    function startGame(mode){
+      restartControls.style.display='none';
+      let selectedForms=[];
+
+      if(mode==='stem'){
+        document.getElementById('word-select').style.display='none';
+        const declKey=getDeclKey();
+        if(declKey){ selectedForms=endings[declKey].map(pair=>["-"+pair[0],"-"+pair[1]]); }
+      }
+
+      else if(mode==='single'){
+        document.getElementById('word-select').style.display='block';
+        const genderPool=selectedGender==='all'?vocab:vocab.filter(v=>v.gender===selectedGender);
+        if(!genderPool.find(v=>v.word===selectedWord)){ selectedWord=genderPool[0]?.word||null; }
+        if(selectedWord) dropdownToggle.textContent=selectedWord;
+        populateDropdown(genderPool);
+        if(selectedWord){ selectedForms=generateForms(genderPool.find(v=>v.word===selectedWord),'single'); }
+      } 
+
+      else if(mode==='mixed'){
+        document.getElementById('word-select').style.display='none';
+        const genderPool=selectedGender==='all'?vocab:vocab.filter(v=>v.gender===selectedGender);
+        selectedForms=cases.map((_,i)=>{
+          const randomWord=genderPool[Math.floor(Math.random()*genderPool.length)];
+          return [randomWord.stem+endings[randomWord.decl][i][0],randomWord.stem+endings[randomWord.decl][i][1]];
+        });
+        lastMixedSet=selectedForms; // save this set
+      }
+
+      buildTable(selectedForms);
+      if(selectedForms.length>0) loadPool(selectedForms);
+      highlightNextCell();
+    }
+
+    function restartMixed(){
+      if(lastMixedSet){
+        buildTable(lastMixedSet);
+        loadPool(lastMixedSet);
+        highlightNextCell();
+      }
+    }
+
+    function newMixed(){
+      startGame('mixed'); // generate a fresh random set
+    }
+
+    // --- Event listeners ---
+    pool.addEventListener('click',e=>{
+      if(!currentCell)return;
+      if(!e.target.classList.contains('pool-item'))return;
+      const chosen=e.target.dataset.value;
+      const correct=currentCell.dataset.answer;
+      if(chosen===correct){
+        currentCell.textContent=chosen;
+        currentCell.classList.add('correct');
+        e.target.classList.add('used');
+        highlightNextCell();
+      } else {
+        currentCell.classList.add('incorrect');
+        setTimeout(()=>currentCell.classList.remove('incorrect'),500);
+      }
+      if(!trainingStarted){
+        trainingStarted=true;
+        document.getElementById('gender-select').classList.add('hidden');
+        document.getElementById('mode-select').classList.add('hidden');
+      }
+    });
+
+    document.querySelectorAll('.mode-button').forEach(button=>{
+      button.addEventListener('click',e=>{
+        document.querySelectorAll('.mode-button').forEach(btn=>btn.classList.remove('active'));
+        e.target.classList.add('active');
+        startGame(e.target.dataset.mode);
+      });
+    });
+
+    document.querySelectorAll('.gender-button').forEach(button=>{
+      button.addEventListener('click',e=>{
+        document.querySelectorAll('.gender-button').forEach(btn=>btn.classList.remove('active'));
+        e.target.classList.add('active');
+        selectedGender=e.target.dataset.gender;
+        selectedWord=null;
+        startGame(document.querySelector('.mode-button.active').dataset.mode);
+      });
+    });
+
+    function toggleSettings() {
+      document.getElementById('gender-select').classList.toggle('hidden');
+      document.getElementById('mode-select').classList.toggle('hidden');
+      trainingStarted = !trainingStarted;
+    }
+
+    document.getElementById('settings-button').addEventListener('click', toggleSettings);
+    document.getElementById('hamburger-button').addEventListener('click', toggleSettings);
+
+    dropdownToggle.addEventListener('click',()=>{
+      document.getElementById('customDropdown').classList.toggle('open');
+    });
+
+    startGame(document.querySelector('.mode-button.active').dataset.mode);
+
+
+
+    startGame(document.querySelector('.mode-button.active').dataset.mode);
+  </script>
+
+
+
+</body>
+</html>

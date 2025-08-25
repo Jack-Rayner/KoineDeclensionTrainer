@@ -136,16 +136,33 @@
     /* --- Dark mode --- */
     @media (prefers-color-scheme: dark) {
       body { background: #121212; color: #e6e6e6; }
-      h1 { color: #d8f3dc; }
+      h1 { color: #e6e6e6; }
+      
+      #gender-select h2, #mode-select h2, #word-select h2 {
+        color: #d8f3dc;
+      }
 
-      .gender-button { background: linear-gradient(135deg, #40916c, #2d6a4f); }
-      .gender-button.active { background: linear-gradient(135deg, #74c69d, #40916c); }
+      .gender-button {
+        background: linear-gradient(135deg, #58b88b, #2d6a4f);
+        color: #fff;
+      }
+      .gender-button.active {
+        background: linear-gradient(135deg, #b7e4c7, #74c69d);
+        color: #081c15;
+      }
 
-      .mode-button { background: linear-gradient(135deg, #2d6a4f, #081c15); }
-      .mode-button.active { background: linear-gradient(135deg, #95d5b2, #2d6a4f); }
+      .mode-button {
+        background: linear-gradient(135deg, #3c8d6e, #163d2b);
+        color: #fff;
+      }
+      .mode-button.active {
+        background: linear-gradient(135deg, #caffbf, #58b88b);
+        color: #081c15;
+      }
 
       #settings-button, #hamburger-button {
-        background: linear-gradient(135deg, #2d6a4f, #081c15);
+        background: linear-gradient(135deg, #74c69d, #40916c);
+        color: #081c15;
       }
 
       .custom-dropdown-toggle {
@@ -155,7 +172,10 @@
       .custom-dropdown-menu div { color: #e6e6e6; }
       .custom-dropdown-menu div:hover { background: #40916c; color: #fff; }
 
-      table { box-shadow: 0 4px 15px rgba(255,255,255,0.1); }
+      table { 
+        box-shadow: 0 2px 12px rgba(0,0,0,0.7)
+        /* box-shadow: 0 4px 15px rgba(255,255,255,0.1);  */
+      }
       th { background: #2d6a4f; }
       td { background: #1e1e1e; color: #e6e6e6; }
       td[data-answer] { background: #2c2c2c; }

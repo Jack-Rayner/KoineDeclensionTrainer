@@ -361,8 +361,19 @@
 
       if(mode==='stem'){
         document.getElementById('word-select').style.display='none';
-        const declKey=getDeclKey();
-        if(declKey){ selectedForms=endings[declKey].map(pair=>["-"+pair[0],"-"+pair[1]]); }
+
+        if(selectedGender === 'all'){
+          const declKeys = Object.values(genderDeclMap);
+          selectedForms = cases.map((_,i) => {
+            const randomDecl = declKeys[Math.floor(Math.random()*declKeys.length)];
+            return ["-"+endings[randomDecl][i][0], "-"+endings[randomDecl][i][1]];
+          });
+        } else {
+          const declKey=getDeclKey();
+          if(declKey){ 
+            selectedForms=endings[declKey].map(pair=>["-"+pair[0],"-"+pair[1]]);
+          }
+        }
       }
 
       else if(mode==='single'){
@@ -381,13 +392,14 @@
           const randomWord=genderPool[Math.floor(Math.random()*genderPool.length)];
           return [randomWord.stem+endings[randomWord.decl][i][0],randomWord.stem+endings[randomWord.decl][i][1]];
         });
-        lastMixedSet=selectedForms; // save this set
+        lastMixedSet=selectedForms;
       }
 
       buildTable(selectedForms);
       if(selectedForms.length>0) loadPool(selectedForms);
       highlightNextCell();
     }
+
 
     function restartMixed(){
       if(lastMixedSet){
@@ -460,8 +472,6 @@
 
     startGame(document.querySelector('.mode-button.active').dataset.mode);
   </script>
-
-
 
 </body>
 </html>

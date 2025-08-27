@@ -53,7 +53,18 @@
       font-weight: bold;
       cursor: pointer;
     }
-    .custom-dropdown-menu { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 2px solid #2d6a4f; border-radius: 12px; margin-top: 8px; display: none; z-index: 100; }
+    .custom-dropdown-menu { 
+      position: absolute; 
+      top: 100%; left: 0; 
+      right: 0; 
+      min-width: max-content;
+      background: #fff; 
+      border: 2px solid #2d6a4f; 
+      border-radius: 12px; 
+      margin-top: 8px; 
+      display: none; 
+      z-index: 100; 
+    }
     .custom-dropdown-menu div { padding: 12px; font-weight: bold; font-size: 1.2em; color: #1b4332; cursor: pointer; }
     .custom-dropdown-menu div:hover { background: #95d5b2; color: #000; }
     .custom-dropdown.open .custom-dropdown-menu { display: block; }
@@ -224,7 +235,6 @@
       }
     }
 
-
     /* --- Dark mode --- */
     @media (prefers-color-scheme: dark) {
       body { background: #121212; color: #e6e6e6; }
@@ -283,7 +293,6 @@
     }
   </style>
 
-
 </head>
 <body>
   <div class="top-bar">
@@ -291,8 +300,6 @@
     <button id="settings-button">⚙</button>
     <button id="hamburger-button">☰</button>
   </div>
-
-
 
   <div id="gender-select">
     <h2>Select Gender</h2>
@@ -516,7 +523,6 @@
       highlightNextCell();
     }
 
-
     function restartMixed(){
       if(lastMixedSet){
         buildTable(lastMixedSet);
@@ -581,10 +587,6 @@
     dropdownToggle.addEventListener('click',()=>{
       document.getElementById('customDropdown').classList.toggle('open');
     });
-
-    startGame(document.querySelector('.mode-button.active').dataset.mode);
-
-
 
     startGame(document.querySelector('.mode-button.active').dataset.mode);
   </script>

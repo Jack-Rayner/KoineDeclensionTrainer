@@ -181,7 +181,7 @@
         padding: 8px 16px;
         border-radius: 14px;
       }
-
+      
       .custom-dropdown-toggle { 
         width: 100%; 
         text-align: center; 
@@ -589,6 +589,28 @@
     });
 
     startGame(document.querySelector('.mode-button.active').dataset.mode);
+
+    // postMessage listener for portfolio scroll automation
+    window.addEventListener('message', (event) => {
+      if (event.data.action === 'highlightRandom') {
+        highlightNextCell();
+      }
+      
+      if (event.data.action === 'showCorrectAnswer') {
+        if (currentCell) {
+          const correctAnswer = currentCell.dataset.answer;
+          currentCell.textContent = correctAnswer;
+          currentCell.classList.add('correct');
+          // Mark the corresponding pool item as used
+          const poolItems = document.querySelectorAll('.pool-item');
+          poolItems.forEach(item => {
+            if (item.dataset.value === correctAnswer) {
+              item.classList.add('used');
+            }
+          });
+        }
+      }
+    });
   </script>
 
 </body>
